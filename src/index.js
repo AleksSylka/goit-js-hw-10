@@ -11,7 +11,11 @@ inputEl.addEventListener('input', debounce(onArrayCountry, DEBOUNCE_DELAY))
 
 function onArrayCountry() {
     let name = inputEl.value.trim();
-    
+    if (!name) {
+        ulEl.innerHTML = '';
+        divEl.innerHTML = '';
+        return
+    }
     fetchCountries(name).then(arrayCountries => {
         if (arrayCountries.length > 10) {
             Notiflix.Notify.info('Too many matches found. Please enter a more specific name.')
