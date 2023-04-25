@@ -1,7 +1,7 @@
 import './css/styles.css';
 import Notiflix from 'notiflix';
 var debounce = require('lodash.debounce');
-import { fetchCountries } from './js/fetchCountries';
+import fetchCountries from './js/fetchCountries';
 const DEBOUNCE_DELAY = 300;
 const inputEl = document.querySelector('input');
 const ulEl = document.querySelector('.country-list');
@@ -12,22 +12,28 @@ inputEl.addEventListener('input', debounce(onArrayCountry, DEBOUNCE_DELAY))
 function onArrayCountry() {
     let name = inputEl.value.trim();
     if (!name) {
-        ulEl.innerHTML = '';
-        divEl.innerHTML = '';
+        onClearTag()
         return
     }
     fetchCountries(name).then(arrayCountries => {
         if (arrayCountries.length > 10) {
+            onClearTag();
             Notiflix.Notify.info('Too many matches found. Please enter a more specific name.')
         } else if (arrayCountries.length === 1) {
-            ulEl.innerHTML = ''
+            onClearTag();
             divEl.innerHTML = createMarkupCountry(arrayCountries);
         } else {
-            divEl.innerHTML = ''
+            onClearTag();
             ulEl.innerHTML = createMarkupList(arrayCountries);
         }
     }
-    ).catch(err => console.log(err));
+    ).catch(err => {
+        if (err.message === '404') {
+            onClearTag();
+            Notiflix.Notify.failure('Oops, there is no country with that name');
+        }
+        }
+        );
 }
 
 function createMarkupList(arr) {
@@ -46,4 +52,9 @@ function createMarkupCountry(arr) {
       <p class="js-text-card"><b>Capital:</b> ${capital}</p>
       <p class="js-text-card"><b>Population:</b> ${population}</p>
       <p class="js-text-card"><b>Languages:</b> ${Object.values(languages)}</p>`
+};
+
+function onClearTag() {
+    ulEl.innerHTML = '';
+    divEl.innerHTML = '';
 }
